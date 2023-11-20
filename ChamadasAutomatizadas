@@ -1,0 +1,41 @@
+#include <ESP8266WiFi.h>
+
+const char *ssid = "Elevador";
+const char *password = "12345678";
+
+const int relePin = 0; // Pino do relé
+
+bool releAcionado = false; // Flag para rastrear se o relé foi acionado
+
+void setup() {
+  Serial.begin(115200);
+  // Configura o ESP-01S como um ponto de acesso
+  WiFi.softAP(ssid, password);
+  
+  // Configura o pino do relé como saída
+  pinMode(relePin, OUTPUT);
+}
+
+void loop() {
+  // Obtém o número de dispositivos conectados ao ponto de acesso
+  int numStations = WiFi.softAPgetStationNum();
+
+  // Se não houver dispositivos conectados e o relé foi acionado anteriormente, redefine a flag
+  if (numStations == 0 && releAcionado) {
+    releAcionado = false;
+  }
+
+  // Se há dispositivos conectados e o relé ainda não foi acionado
+  if (numStations > 0 && !releAcionado) {
+    // Ativa o relé
+    digitalWrite(relePin, HIGH);
+    delay(3000); // Aguarda 3 segundos
+    // Desativa o relé
+    digitalWrite(relePin, LOW);
+
+    // Define a flag como true para indicar que o relé foi acionado
+    releAcionado = true;
+  }
+
+  delay(4000); // Aguarda 4 segundos antes de verificar novamente
+}
